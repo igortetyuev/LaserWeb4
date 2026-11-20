@@ -204,7 +204,7 @@ class FloatingControls extends React.Component {
             drag: this.props.settings.uiFcDrag
         }
     }
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
 
         this.linkScaleChanged = e => {
             this.setState({ linkScale: e.target.checked });
@@ -360,10 +360,10 @@ class FloatingControls extends React.Component {
                         <tr>
                             <td><Icon name="gear" /></td><td colSpan="7" >
                                 <ButtonGroup>
-                                    <Button bsSize="xs" bsStyle="warning" onClick={(e) => this.toolOptimize(doc, this.props.settings.machineBeamDiameter, this.props.settings.toolImagePosition)}><Icon name="picture-o" /> Raster Opt.</Button>
-                                    <Button bsSize="xs" bsStyle="danger" onClick={(e) => this.toolOptimize(doc, null, this.props.settings.toolImagePosition)}><Icon name="undo" /></Button>
+                                    <Button size="xs" variant="warning" onClick={(e) => this.toolOptimize(doc, this.props.settings.machineBeamDiameter, this.props.settings.toolImagePosition)}><Icon name="picture-o" /> Raster Opt.</Button>
+                                    <Button size="xs" variant="danger" onClick={(e) => this.toolOptimize(doc, null, this.props.settings.toolImagePosition)}><Icon name="undo" /></Button>
                                 </ButtonGroup>
-                                &nbsp;<ImageEditorButton bsSize="xs"><Icon name="code" /> Filters/Trace</ImageEditorButton>
+                                &nbsp;<ImageEditorButton size="xs"><Icon name="code" /> Filters/Trace</ImageEditorButton>
                             </td>
                         </tr>
                     </tfoot>
@@ -457,13 +457,13 @@ class FloatingControls extends React.Component {
                                 </td>
                                 <td rowSpan={2}><Input value={round(this.state.degrees)} onChangeValue={this.setDegrees} type="number" step="any" tabIndex="10" /><br />
                                     <ButtonGroup>
-                                        <Button bsSize="xsmall" onClick={e => this.rotate(e, false)} bsStyle="info"><Icon fw name="rotate-left"  /></Button>
-                                        <Button bsSize="xsmall" onClick={e => this.rotate(e, true )} bsStyle="info"><Icon fw name="rotate-right" /></Button>
+                                        <Button size="xs" onClick={e => this.rotate(e, false)} variant="info"><Icon fw name="rotate-left"  /></Button>
+                                        <Button size="xs" onClick={e => this.rotate(e, true )} variant="info"><Icon fw name="rotate-right" /></Button>
                                     </ButtonGroup>
                                     <br />
                                     <ButtonGroup>
-                                        <Button bsSize="xsmall" onClick={e => this.flipTopBorrom()} bsStyle="info"><Icon fw name="arrows-v" /></Button>
-                                        <Button bsSize="xsmall" onClick={e => this.flipLeftRight()} bsStyle="info"><Icon fw name="arrows-h" /></Button>
+                                        <Button size="xs" onClick={e => this.flipTopBorrom()} variant="info"><Icon fw name="arrows-v" /></Button>
+                                        <Button size="xs" onClick={e => this.flipLeftRight()} variant="info"><Icon fw name="arrows-h" /></Button>
                                     </ButtonGroup>
                                 </td>
                             </tr>
@@ -676,7 +676,7 @@ class WorkspaceContent extends React.Component {
         this.drawSelDocsState = {};
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.pointers = [];
         this.lightenMachineBounds = new LightenMachineBounds();
         this.grid = new Grid();
@@ -958,7 +958,7 @@ class WorkspaceContent extends React.Component {
         this.__updating = true;
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         this.setCamera(nextProps);
     }
 
@@ -1284,7 +1284,7 @@ WorkspaceContent = connect(
 )(withDocumentCache(WorkspaceContent));
 
 class Workspace extends React.Component {
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.gcodePreview = new GcodePreview();
         this.laserPreview = new LaserPreview();
         this.setSimTime = e => {

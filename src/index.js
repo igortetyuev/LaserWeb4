@@ -1,5 +1,5 @@
 import React from 'react'
-import { render } from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { compose, applyMiddleware, createStore } from 'redux';
 import { Provider } from 'react-redux';
 import { createLogger } from 'redux-logger';
@@ -63,12 +63,14 @@ function Hot(props) {
     return <LaserWeb />;
 }
 
+const root = createRoot(document.getElementById('laserweb'));
+
 function renderHot() {
-    render((
+    root.render((
         <Provider store={store}>
             <Hot />
         </Provider>
-    ), document.getElementById('laserweb'));
+    ));
 }
 renderHot();
 

@@ -15,8 +15,7 @@
 
 import React from 'react'
 import { connect } from 'react-redux';
-import Select from 'react-select';
-import uuidv4 from 'uuid/v4';
+import { LegacySelect } from './forms.js';
 
 import { removeOperation, moveOperation, setCurrentOperation, operationRemoveDocument, setOperationAttrs, clearOperations, spreadOperationField, operationLatheTurnAdd, operationLatheTurnRemove, operationLatheTurnSetAttrs } from '../actions/operation';
 import { selectDocument } from '../actions/document'
@@ -26,7 +25,7 @@ import { Input, InputRangeField } from './forms.js';
 import { GetBounds, withGetBounds, withStoredBounds } from './get-bounds.js';
 import { selectedDocuments } from './document'
 
-import Toggle from 'react-toggle';
+import Toggle from './toggle';
 import { isObject, getDescendantProp } from '../lib/helpers';
 
 import { MaterialPickerButton, MaterialSaveButton } from './material-database'
@@ -40,8 +39,7 @@ import { confirm } from './laserweb'
 
 import { SETTINGS_INITIALSTATE } from '../reducers/settings'
 
-import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import "../styles/context-menu.css";
+
 
 function StringInput(props) {
     let { op, field, operationsBounds, fillColors, strokeColors, settings, dispatch, ...rest } = props;
@@ -84,16 +82,16 @@ function RangeInput(minValue, maxValue) {
 
 function TagInput(statekey, opts = { multi: true, simpleValue: true, delimiter: ',', clearable: true }, connector) {
     if (!connector) connector = (state) => { return { options: Object.entries(getDescendantProp(state, statekey)).map(i => { return { label: i[1].label, value: i[0] } }) } }
-    return connect(connector)(React.createClass({
-        render: function () {
-            return <Select options={this.props.options} value={this.props.op[this.props.field.name]} onChange={e => this.props.onChangeValue(e)} {...{ ...opts }} />
+    return connect(connector)(class extends React.Component {
+        render() {
+            return <LegacySelect options={this.props.options} value={this.props.op[this.props.field.name]} onChange={e => this.props.onChangeValue(e)} {...{ ...opts }} />
         }
-    }))
+    })
 
 }
 
 function ButtonInput(args) {
-    return <Button onClick={e => args.field.onClick(e, args)} bsSize="xsmall" bsStyle="info" >{args.field.buttonLabel}</Button>;
+    return <Button onClick={e => args.field.onClick(e, args)} size="xs" variant="info" >{args.field.buttonLabel}</Button>;
 }
 
 function TableInput({ op, field, operationsBounds, fillColors, strokeColors, settings, dispatch }) {
@@ -111,7 +109,7 @@ function TableInput({ op, field, operationsBounds, fillColors, strokeColors, set
                 }} />
             </td>)}
             <td>
-                <button className="btn btn-default btn-xs" onClick={e => dispatch(remove(item.id))}>
+                <button className="btn btn-light btn-xs" onClick={e => dispatch(remove(item.id))}>
                     <i className="fa fa-trash"></i>
                 </button>
             </td>
@@ -127,7 +125,7 @@ function ColorBox(v) {
 }
 
 class FilterInput extends React.Component {
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.onChange = this.onChange.bind(this);
     }
 
@@ -148,7 +146,7 @@ class FilterInput extends React.Component {
         else
             value = null;
         return (
-            <Select
+            <LegacySelect
                 value={value} options={colors} onChange={this.onChange} searchable={false}
                 optionRenderer={ColorBox} valueRenderer={ColorBox} {...rest} />
         );
@@ -179,7 +177,7 @@ function NoOperationsError(props) {
 }
 
 class Field extends React.Component {
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.onChangeValue = this.onChangeValue.bind(this);
         this.onChange = this.onChange.bind(this);
         this.onFocus = this.onFocus.bind(this);
@@ -252,7 +250,7 @@ class Field extends React.Component {
 };
 
 class Doc extends React.Component {
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.remove = e => {
             this.props.dispatch(operationRemoveDocument(this.props.op.id, this.props.isTab, this.props.id));
         }
@@ -266,7 +264,7 @@ class Doc extends React.Component {
                     └ <a style={{ userSelect: 'none', cursor: 'pointer', textDecoration: 'bold', color: '#FFF', paddingLeft: 5, paddingRight: 5, paddingBottom: 3, backgroundColor: '#337AB7', border: '1px solid', borderColor: '#2e6da4', borderRadius: 2 }} onClick={(e) => { this.props.dispatch(selectDocument(id)) }}>{documents.find(d => d.id === id).name}</a>
                 </td>
                 <td>
-                    <button className="btn btn-default btn-xs" onClick={this.remove}>
+                    <button className="btn btn-light btn-xs" onClick={this.remove}>
                         <i className="fa fa-trash"></i>
                     </button>
                 </td>
@@ -467,14 +465,56 @@ const checkLatheTurn = {
     },
 };
 
-const FieldContextMenu = (id = uuidv4()) => {
-    return ({ children, dispatch, op, field, settings }) => {
-        let ctx = <ContextMenu id={id}>
-            <MenuItem onClick={e => dispatch(spreadOperationField(op.id, field.name))}>Copy to all Ops</MenuItem>
-        </ContextMenu>
-        return <div title="Right click or press long to popup context menu"><ContextMenuTrigger id={id} holdToDisplay={1000}>{children}</ContextMenuTrigger>{ctx}</div>
+class FieldContextMenuComponent extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { open: false, x: 0, y: 0 };
+        this.longPress = null;
+        this.handleClickOutside = e => {
+            if (this.state.open && !(this.menu && this.menu.contains(e.target)))
+                this.setState({ open: false });
+        };
+        this.handleEsc = e => { if (e.key === 'Escape') this.setState({ open: false }); };
+    }
+
+    componentDidMount() {
+        document.addEventListener('mousedown', this.handleClickOutside);
+        document.addEventListener('keydown', this.handleEsc);
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('mousedown', this.handleClickOutside);
+        document.removeEventListener('keydown', this.handleEsc);
+        clearTimeout(this.longPress);
+    }
+
+    openAt(x, y) {
+        this.setState({ open: true, x, y });
+    }
+
+    render() {
+        let { children, dispatch, op, field } = this.props;
+        return (
+            <div title="Right click or press long to popup context menu"
+                onContextMenu={e => { e.preventDefault(); this.openAt(e.clientX, e.clientY); }}
+                onTouchStart={e => { let t = e.touches[0]; this.longPress = setTimeout(() => this.openAt(t.clientX, t.clientY), 1000); }}
+                onTouchEnd={() => clearTimeout(this.longPress)}
+                onTouchMove={() => clearTimeout(this.longPress)}>
+                {children}
+                {this.state.open ? (
+                    <div className="dropdown-menu show lw-context-menu" style={{ left: this.state.x, top: this.state.y }} ref={m => this.menu = m}>
+                        <button type="button" className="dropdown-item" onClick={e => {
+                            this.setState({ open: false });
+                            dispatch(spreadOperationField(op.id, field.name));
+                        }}>Copy to all Ops</button>
+                    </div>
+                ) : null}
+            </div>
+        );
     }
 }
+
+const FieldContextMenu = () => FieldContextMenuComponent;
 
 export const OPERATION_LATHE_TURN_FIELDS = {
     startDiameter: { name: 'startDiameter', label: 'Start Diameter', input: NumberInput, style: { width: 80 }, ...checkLatheTurn },
@@ -645,7 +685,7 @@ const traverseDocumentTypes = (ids, documents) => {
 
 class Operation extends React.Component {
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.setType = e => this.props.dispatch(setOperationAttrs({ type: e.target.value }, this.props.op.id));
         this.setTypeString = e => this.props.dispatch(setOperationAttrs({ type: e }, this.props.op.id));
         this.toggleExpanded = e => this.props.dispatch(setOperationAttrs({ expanded: !this.props.op.expanded }, this.props.op.id));
@@ -662,7 +702,7 @@ class Operation extends React.Component {
         this.operationGroups = groupFields(OPERATION_TYPES[this.props.op.type].fields)
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
 
         if (nextProps.op.documents.length !== this.documentsCount) {
             this.documentsCount = nextProps.op.documents.length
@@ -725,8 +765,8 @@ class Operation extends React.Component {
                         </div>
                         <div className="btn-group">
                             <button className={"btn btn-warning btn-xs " + (op.enabled ? '' : 'btn-off')} onClick={this.toggleEnabled} title="Enable/Disable operation"><i className="fa fa-power-off"></i></button>
-                            <button className="btn btn-default btn-xs " onClick={this.moveUp}><i className="fa fa-arrow-up"></i></button>
-                            <button className="btn btn-default btn-xs" onClick={this.moveDn}><i className="fa fa-arrow-down"></i></button>
+                            <button className="btn btn-light btn-xs " onClick={this.moveUp}><i className="fa fa-arrow-up"></i></button>
+                            <button className="btn btn-light btn-xs" onClick={this.moveDn}><i className="fa fa-arrow-down"></i></button>
                             <button className="btn btn-danger btn-xs" onClick={this.remove}><i className="fa fa-times"></i></button>
                         </div>
                     </span>
@@ -929,9 +969,9 @@ class OperationToolbar extends React.Component {
         let hasSelected = this.props.documents.some((item) => item.selected)
         let settings = this.props.settings;
         return <ButtonToolbar style={{ paddingBottom: "5px", marginBottom: "5px", borderBottom: "1px solid #eee" }}>
-            <Button disabled={!hasSelected && !settings.toolCreateEmptyOps} onClick={(e) => { this.handleAddSingle() }} bsSize="xsmall" bsStyle="info" title="Create a single operation with the selected documents"><Icon name="object-group" /> Create Single </Button>
-            <Button disabled={!hasSelected} onClick={(e) => { this.handleAddMultiple() }} bsSize="xsmall" bsStyle="info" title="Create operations with each of the selected documents"><Icon name="object-ungroup" /> Create Multiple </Button>
-            <Button disabled={!this.props.operations.length} onClick={e => this.handleClearAll()} bsStyle="danger" bsSize="xsmall" title="Clear all operations" >Clear All</Button>
+            <Button disabled={!hasSelected && !settings.toolCreateEmptyOps} onClick={(e) => { this.handleAddSingle() }} size="xs" variant="info" title="Create a single operation with the selected documents"><Icon name="object-group" /> Create Single </Button>
+            <Button disabled={!hasSelected} onClick={(e) => { this.handleAddMultiple() }} size="xs" variant="info" title="Create operations with each of the selected documents"><Icon name="object-ungroup" /> Create Multiple </Button>
+            <Button disabled={!this.props.operations.length} onClick={e => this.handleClearAll()} variant="danger" size="xs" title="Clear all operations" >Clear All</Button>
         </ButtonToolbar>
     }
 }

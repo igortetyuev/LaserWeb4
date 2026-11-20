@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 
 export class GetBounds extends React.Component {
@@ -66,7 +67,7 @@ export class GetBounds extends React.Component {
     }
 }
 GetBounds.childContextTypes = {
-    bounds: React.PropTypes.any,
+    bounds: PropTypes.any,
 };
 
 export function withGetBounds(Component) {
@@ -89,7 +90,7 @@ export function withStoredBounds(Component) {
         }
     };
     Wrapper.contextTypes = {
-        bounds: React.PropTypes.any,
+        bounds: PropTypes.any,
     };
     return Wrapper;
 }

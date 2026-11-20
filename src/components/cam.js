@@ -54,7 +54,7 @@ function NoDocumentsError(props) {
 }
 
 function GcodeProgress({ gcoding, onStop }) {
-    return <div style={{ display: "flex", flexDirection: "row" }}><ProgressBar now={gcoding.percent} active={gcoding.enable} label={`${gcoding.percent}%`} style={{ flexGrow: 1, marginBottom: "0px" }} /><Button onClick={onStop} bsSize="xs" bsStyle="danger"><Icon name="hand-paper-o" /></Button></div>
+    return <div style={{ display: "flex", flexDirection: "row" }}><ProgressBar now={gcoding.percent} animated={gcoding.enable} label={`${gcoding.percent}%`} style={{ flexGrow: 1, marginBottom: "0px" }} /><Button onClick={onStop} size="xs" variant="danger"><Icon name="hand-paper-o" /></Button></div>
 }
 
 GcodeProgress = connect((state) => { return { gcoding: state.gcode.gcoding } })(GcodeProgress)
@@ -79,7 +79,7 @@ class Cam extends React.Component {
         this.state={filter:null}
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         let that = this
         window.generateGcode = e => {
             let { settings, documents, operations } = that.props;
@@ -148,7 +148,7 @@ class Cam extends React.Component {
                                     </td>
                                     <td>
                                         <ApplicationSnapshotToolbar loadButton saveButton stateKeys={['documents', 'operations', 'currentOperation', 'settings.toolFeedUnits']} saveName="Laserweb-Workspace.json" label="Workspace" className="well well-sm">
-                                            <Button bsSize="xsmall" bsStyle="warning" onClick={e => this.props.resetWorkspace(e)}>Reset <Icon name="trash" /></Button>
+                                            <Button size="xs" variant="warning" onClick={e => this.props.resetWorkspace(e)}>Reset <Icon name="trash" /></Button>
                                         </ApplicationSnapshotToolbar>
                                     </td>
                                 </tr>
@@ -181,23 +181,23 @@ class Cam extends React.Component {
                 <Splitter style={{ flexShrink: 0 }} split="horizontal" initialSize={100} resizerStyle={{ marginTop: 2, marginBottom: 2 }} splitterId="cam-documents">
                     <div style={{height:"100%", display:"flex", flexDirection:"column"}} >
                         <div style={{ overflowY: 'auto', flexGrow:1 }}><Documents documents={documents} filter={this.state.filter} toggleExpanded={toggleDocumentExpanded} /></div>
-                        {documents.length ? <ButtonToolbar bsSize="xsmall" bsStyle="default">
+                        {documents.length ? <ButtonToolbar>
                             
                             <ButtonGroup>
-                                <Button  bsStyle="info" bsSize="xsmall" onClick={e=>{this.props.dispatch(selectDocuments(true))}} title="Select all"><Icon name="cubes"/></Button>
-                                <Button  bsStyle="default" bsSize="xsmall" onClick={e=>{this.props.dispatch(selectDocuments(false))}} title="Select none"><Icon name="cubes"/></Button>
+                                <Button  variant="info" size="xs" onClick={e=>{this.props.dispatch(selectDocuments(true))}} title="Select all"><Icon name="cubes"/></Button>
+                                <Button  variant="light" size="xs" onClick={e=>{this.props.dispatch(selectDocuments(false))}} title="Select none"><Icon name="cubes"/></Button>
                             </ButtonGroup>
-                            <Button  bsStyle="warning" bsSize="xsmall" disabled={!someSelected} onClick={e=>{this.props.dispatch(cloneDocumentSelected())}} title="Clone selected"><Icon name="copy"/></Button>
-                            <Button  bsStyle="danger" bsSize="xsmall" disabled={!someSelected} onClick={e=>{this.props.dispatch(removeDocumentSelected())}} title="Remove selected"><Icon name="trash"/></Button>
+                            <Button  variant="warning" size="xs" disabled={!someSelected} onClick={e=>{this.props.dispatch(cloneDocumentSelected())}} title="Clone selected"><Icon name="copy"/></Button>
+                            <Button  variant="danger" size="xs" disabled={!someSelected} onClick={e=>{this.props.dispatch(removeDocumentSelected())}} title="Remove selected"><Icon name="trash"/></Button>
                             <ButtonGroup>
-                                <ColorPicker to="rgba" icon="pencil" bsSize="xsmall" disabled={!someSelected} onClick={v=>this.props.dispatch(colorDocumentSelected({strokeColor:v||[0,0,0,1]}))}/>
-                                <ColorPicker to="rgba" icon="paint-brush" bsSize="xsmall" disabled={!someSelected} onClick={v=>this.props.dispatch(colorDocumentSelected({fillColor:v||[0,0,0,0]}))}/>
+                                <ColorPicker to="rgba" icon="pencil" size="xs" disabled={!someSelected} onClick={v=>this.props.dispatch(colorDocumentSelected({strokeColor:v||[0,0,0,1]}))}/>
+                                <ColorPicker to="rgba" icon="paint-brush" size="xs" disabled={!someSelected} onClick={v=>this.props.dispatch(colorDocumentSelected({fillColor:v||[0,0,0,0]}))}/>
                             </ButtonGroup>
-                            <SearchButton bsStyle="primary" bsSize="xsmall" search={this.state.filter} onSearch={filter=>{this.setState({filter})}} placement="bottom"><Icon name="search"/></SearchButton>
+                            <SearchButton variant="primary" size="xs" search={this.state.filter} onSearch={filter=>{this.setState({filter})}} placement="bottom"><Icon name="search"/></SearchButton>
                             </ButtonToolbar>:undefined}
                     </div>
                 </Splitter>
-                <Alert bsStyle="success" style={{ padding: "4px", marginBottom: 7 }}>
+                <Alert variant="success" style={{ padding: "4px", marginBottom: 7 }}>
                     <table style={{ width: 100 + '%' }}>
                         <tbody>
                             <tr>

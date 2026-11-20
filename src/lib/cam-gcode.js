@@ -96,7 +96,7 @@ export function getGcode(settings, documents, operations, documentCacheHolder, s
                 let filteredDocIds = [];
                 let docsWithImages = [];
 
-                let preflightWorker = require('worker-loader!./workers/cam-preflight.js');
+                let preflightWorker = require('worker-loader?esModule=false!./workers/cam-preflight.js');
                 let preflight = new preflightWorker()
                 preflight.onmessage = (e) => {
                     let data = e.data;
@@ -133,7 +133,7 @@ export function getGcode(settings, documents, operations, documentCacheHolder, s
 
                     if (op.type === 'Laser Cut' || op.type === 'Laser Cut Inside' || op.type === 'Laser Cut Outside' || op.type === 'Laser Fill Path') {
 
-                        invokeWebWorker(require('worker-loader!./workers/cam-lasercut.js'), { settings, opIndex, op, geometry, openGeometry, tabGeometry }, cb, jobIndex)
+                        invokeWebWorker(require('worker-loader?esModule=false!./workers/cam-lasercut.js'), { settings, opIndex, op, geometry, openGeometry, tabGeometry }, cb, jobIndex)
 
                     } else if (op.type === 'Laser Raster') {
 
@@ -145,11 +145,11 @@ export function getGcode(settings, documents, operations, documentCacheHolder, s
 
                     } else if (op.type.substring(0, 5) === 'Mill ') {
 
-                        invokeWebWorker(require('worker-loader!./workers/cam-mill.js'), { settings, opIndex, op, geometry, openGeometry, tabGeometry }, cb, jobIndex)
+                        invokeWebWorker(require('worker-loader?esModule=false!./workers/cam-mill.js'), { settings, opIndex, op, geometry, openGeometry, tabGeometry }, cb, jobIndex)
 
                     } else if (op.type.substring(0, 6) === 'Lathe ') {
 
-                        invokeWebWorker(require('worker-loader!./workers/cam-lathe.js'), { settings, opIndex, op, geometry, openGeometry, tabGeometry }, cb, jobIndex)
+                        invokeWebWorker(require('worker-loader?esModule=false!./workers/cam-lathe.js'), { settings, opIndex, op, geometry, openGeometry, tabGeometry }, cb, jobIndex)
 
                     } else {
                         showAlert("Unknown operation " + op.type, 'warning')

@@ -1,0 +1,138 @@
+/* Bootstrap 5 compatibility layer: restores BS3 density and
+   the few bits that have no direct BS5 equivalent. */
+
+html {
+    font-size: 14px;
+}
+
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* .btn-xs (react-bootstrap size="xs") */
+.btn-xs,
+.btn-group-xs > .btn {
+    --bs-btn-padding-y: 0.0715rem;
+    --bs-btn-padding-x: 0.357rem;
+    --bs-btn-font-size: 0.857rem;
+    --bs-btn-border-radius: 0.214rem;
+}
+
+/* BS3 btn-default look: use variant="light" */
+.btn-light {
+    --bs-btn-border-color: var(--bs-border-color);
+    --bs-btn-hover-border-color: #adadad;
+    --bs-btn-active-border-color: #adadad;
+}
+
+/* Accordion header colors for former Panel bsStyle */
+.lw-acc-primary > .accordion-header > .accordion-button {
+    background-color: var(--bs-primary);
+    color: #fff;
+}
+.lw-acc-info > .accordion-header > .accordion-button {
+    background-color: var(--bs-info);
+    color: #fff;
+}
+.lw-acc-danger > .accordion-header > .accordion-button {
+    background-color: var(--bs-danger);
+    color: #fff;
+}
+.lw-acc-primary > .accordion-header > .accordion-button:not(.collapsed),
+.lw-acc-info > .accordion-header > .accordion-button:not(.collapsed),
+.lw-acc-danger > .accordion-header > .accordion-button:not(.collapsed) {
+    color: #fff;
+}
+.lw-acc-primary .accordion-button::after,
+.lw-acc-info .accordion-button::after,
+.lw-acc-danger .accordion-button::after {
+    filter: invert(1) brightness(2);
+}
+/* Density: accordion bodies and buttons closer to BS3 panels */
+.accordion-button {
+    padding: 0.571rem 1.071rem;
+}
+.accordion-body {
+    padding: 1.071rem;
+}
+.accordion-item {
+    margin-bottom: 0.357rem;
+}
+
+/* .modal-lg now sets max-width; full-width dialog must override it */
+.full-width .modal-dialog {
+    max-width: 98%;
+}
+
+/* Validation: former validationState="error" on the group */
+.lw-validation-error .form-control,
+.lw-validation-error .form-select,
+.lw-validation-error .lw-select__control {
+    border-color: var(--bs-form-invalid-border-color);
+}
+
+/* react-select: align with form-control inside InputGroup */
+.lw-select__control {
+    min-height: calc(1.5em + 0.75rem + 2px) !important;
+    font-size: 1rem;
+    border-radius: 0;
+}
+.input-group .lw-select__container {
+    flex: 1 1 auto;
+    width: 1%;
+}
+.lw-select__value-container {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+.lw-select__input-container,
+.lw-select__placeholder,
+.lw-select__single-value {
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+.lw-select__menu {
+    z-index: 1060;
+}
+
+/* Switch without label: kill the leftover label indent */
+.form-check.form-switch {
+    padding-left: 2.5em;
+    min-height: 1.5rem;
+}
+.form-switch .form-check-input {
+    margin-left: -2.5em;
+}
+
+/* Context menu (former react-contextmenu) */
+.lw-context-menu {
+    position: fixed;
+    z-index: 1070;
+}
+
+/* react-toggle replacement alignment */
+.toggleField label {
+    margin-left: 0.357rem;
+}
+
+/* Switch renders a block .form-check wrapper; react-toggle was inline */
+.form-check.form-switch {
+    display: inline-block;
+}
+/* Former .react-toggle float rules (index.css / forms.css) */
+#sidebar .panes .pane-settings .accordion-item .form-check.form-switch,
+.form-group.toggle-right .form-check.form-switch,
+.toggleField .form-check.form-switch {
+    float: right;
+}
+
+/* Form.Group keeps its old .form-group class; BS5 has no rule for it */
+.form-group {
+    margin-bottom: 15px;
+}
+/* Former .input-group-addon => .input-group-text */
+.form-group .input-group-text {
+    text-transform: uppercase;
+    font-size: smaller;
+}

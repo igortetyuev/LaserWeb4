@@ -6,7 +6,7 @@
 // React
 import React from 'react'
 import { connect } from 'react-redux';
-import { PanelGroup, Panel, ProgressBar} from 'react-bootstrap';
+import { ProgressBar } from 'react-bootstrap';
 
 import { setSettingsAttrs } from '../actions/settings';
 import { setWorkspaceAttrs } from '../actions/workspace';
@@ -19,8 +19,8 @@ import { MacrosBar } from './macros';
 
 import '../styles/index.css'
 import Icon from './font-awesome'
-import Toggle from 'react-toggle';
-import { Label } from 'react-bootstrap'
+import Toggle from './toggle';
+import { Badge } from 'react-bootstrap'
 import { bindKeys, unbindKeys } from './keyboard'
 import Gamepad from 'gamepad.js';
 import { OmrJog } from './omr';
@@ -363,7 +363,7 @@ class Jog extends React.Component {
         
     }
 
-    componentWillReceiveProps(props)
+    UNSAFE_componentWillReceiveProps(props)
     {
         this.checkGcodeBounds(props.gcode);
     }
@@ -971,7 +971,7 @@ export class LiveJogging extends React.Component {
         return liveJoggingState.active && !liveJoggingState.disabled;
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         liveJoggingState = { active: nextProps.active, hasHomed: nextProps.hasHomed, disabled: nextProps.disabled };
     }
 
@@ -982,7 +982,7 @@ export class LiveJogging extends React.Component {
         }
 
         return <div className="toggleField">
-            <Toggle disabled={!this.props.hasHomed || this.props.disabled} id="toggle_liveJogging" checked={this.props.active} onChange={e => toggleLiveJogging(e.target.checked)} /><label htmlFor="toggle_liveJogging" title="Live jogging allows to travel pressing (ALT or META)+Click in the workspace. Prior homing mandatory. Use carefully."> Live Jogging {this.props.hasHomed ? '': <Label bsStyle="danger" title="Home all first!"><Icon name="home"/>Disabled</Label>}</label>
+            <Toggle disabled={!this.props.hasHomed || this.props.disabled} id="toggle_liveJogging" checked={this.props.active} onChange={e => toggleLiveJogging(e.target.checked)} /><label htmlFor="toggle_liveJogging" title="Live jogging allows to travel pressing (ALT or META)+Click in the workspace. Prior homing mandatory. Use carefully."> Live Jogging {this.props.hasHomed ? '': <Badge bg="danger" title="Home all first!"><Icon name="home"/>Disabled</Badge>}</label>
         </div>
 
     }

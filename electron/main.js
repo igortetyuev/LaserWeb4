@@ -1,6 +1,10 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
+// comm-server logs via console.log; a closed stdout/stderr pipe must not crash the app
+process.stdout.on('error', () => {});
+process.stderr.on('error', () => {});
+
 // Embedded lw.comm-server (runs in the Electron main process)
 const config = require('../vendor/lw.comm-server/config');
 config.IP = '127.0.0.1';

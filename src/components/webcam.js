@@ -4,11 +4,11 @@ import React from 'react';
 import ReactDOM from 'react-dom'
 import { connect } from 'react-redux';
 
-import Rnd from 'react-rnd';
+import { Rnd } from 'react-rnd';
 import Icon from './font-awesome'
-import Select from 'react-select'
-import Toggle from 'react-toggle'
-import { FormGroup, InputGroup, ControlLabel, Button, FormControl } from 'react-bootstrap'
+import { LegacySelect } from './forms.js'
+import Toggle from './toggle'
+import { Form, InputGroup, Button } from 'react-bootstrap'
 
 import '../styles/webcam.css';
 
@@ -34,10 +34,10 @@ export class VideoDeviceField extends React.Component {
     }
 
     render() {
-        return <FormGroup>
-            <ControlLabel>{this.props.description}</ControlLabel>
-            <Select disabled={this.props.disabled} options={this.state.devices} value={this.props.object[this.props.field]} onChange={(v) => this.handleSelection(v)} clearable={false} />
-        </FormGroup>
+        return <Form.Group className="form-group">
+            <Form.Label>{this.props.description}</Form.Label>
+            <LegacySelect disabled={this.props.disabled} options={this.state.devices} value={this.props.object[this.props.field]} onChange={(v) => this.handleSelection(v)} clearable={false} />
+        </Form.Group>
     }
 
 }
@@ -73,7 +73,7 @@ export class VideoResolutionField extends React.Component {
         window.videoCapture.refreshStream({ resolution: resolutionId }, (s) => { console.log('Resolution change: ' + resolutionId + ' [' + s.id + ']') })
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         if (nextProps.deviceId !== this.props.deviceId) {
             this.getResolutions(nextProps.deviceId)
         }
@@ -87,10 +87,10 @@ export class VideoResolutionField extends React.Component {
     render() {
         let resolutions = this.state.resolutions.map((v) => { return { label: `${v.label} (${v.width} x ${v.height}) / ${v.ratio}`, value: v.label } })
         let selected = this.props.object[this.props.field];
-        return <FormGroup>
-            <ControlLabel>{this.props.description}</ControlLabel>
-            <Select isLoading={this.state.isLoading} options={resolutions} value={selected} clearable={false} disabled={!this.props.deviceId} onChange={(v) => this.handleChange(v)} />
-        </FormGroup>
+        return <Form.Group className="form-group">
+            <Form.Label>{this.props.description}</Form.Label>
+            <LegacySelect isLoading={this.state.isLoading} options={resolutions} value={selected} clearable={false} disabled={!this.props.deviceId} onChange={(v) => this.handleChange(v)} />
+        </Form.Group>
     }
 }
 
@@ -216,7 +216,8 @@ export class VideoPort extends React.Component {
         if (this.props.draggable) {
             return <Rnd
                 ref={c => { this.rnd = c; }}
-                initial={{
+                default={{
+                    x: 0, y: 0,
                     width: this.props.width || 320,
                     height: this.props.height || 240,
                 }}
@@ -226,7 +227,7 @@ export class VideoPort extends React.Component {
                 maxHeight={600}
                 lockAspectRatio={true}
                 bounds={this.props.draggable}
-                zIndex={800}
+                style={{zIndex:800}}
             >{element}</Rnd>
         } else {
             return <div>{element}</div>;
@@ -266,16 +267,12 @@ export class ArucoMarker extends React.Component {
             openDataWindow(svg,'image/svg+xml','arucomarker')
         }
 
-        return <FormGroup>
+        return <Form.Group className="form-group">
         <InputGroup>
-            <InputGroup.Button>
-            <Button bsStyle="info" onClick={rand}><Icon name="random"/></Button>
-            </InputGroup.Button>
-            <FormControl type="number" placeholder="0 to 1024" min="0" max="1024" value={this.state.number} onChange={setNumber} />
-            <InputGroup.Button>
-            <Button bsStyle="primary" onClick={popupMarker}>Generate Marker</Button>
-            </InputGroup.Button>
-        </InputGroup>
-        </FormGroup>
+                        <Button variant="info" onClick={rand}><Icon name="random"/></Button>
+                        <Form.Control type="number" placeholder="0 to 1024" min="0" max="1024" value={this.state.number} onChange={setNumber} />
+                        <Button variant="primary" onClick={popupMarker}>Generate Marker</Button>
+                    </InputGroup>
+        </Form.Group>
     }
 }

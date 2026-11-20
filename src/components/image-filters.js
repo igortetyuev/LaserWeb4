@@ -1,13 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom'
 import { connect } from 'react-redux';
-import Rnd from 'react-rnd';
+import { Rnd } from 'react-rnd';
 import { canvasFilters } from '../lib/lw.raster2gcode/canvas-filters';
 import { OPERATION_GROUPS, OPERATION_FIELDS } from './operation';
 import { getSubset } from 'redux-localstorage-filter';
 
-import { Modal, Button, ButtonToolbar, ButtonGroup, FormControl, ControlLabel, FormGroup, PanelGroup, Panel, Collapse, InputGroup } from 'react-bootstrap'
-import Toggle from "react-toggle";
+import { Modal, Button } from 'react-bootstrap'
+import Toggle from './toggle';
 import { Input } from './forms'
 import Potrace from '../lib/potrace/potrace'
 import { loadDocument, setDocumentAttrs } from '../actions/document';
@@ -126,7 +126,8 @@ export class ImagePort extends React.Component {
 
         if (this.props.draggable) {
             return <Rnd ref={c => { this.rnd = c; }}
-                initial={{
+                default={{
+                    x: 0, y: 0,
                     width: this.props.width || 320,
                     height: this.props.height || 240
                 }}
@@ -134,7 +135,7 @@ export class ImagePort extends React.Component {
                 maxWidth={800} maxHeight={600}
                 lockAspectRatio={true}
                 bounds={this.props.draggable}
-                zIndex={10001}>{canvas}</Rnd>
+                style={{zIndex:10001}}>{canvas}</Rnd>
         } else {
             return <div>{canvas}</div>;
         }
@@ -153,7 +154,7 @@ ImagePort = connect(state => ({
 function ImageEditorModal({ modal, className, header, footer, children, ...rest }) {
 
     return (
-        <Modal show={modal.show} onHide={modal.onHide} bsSize="large" aria-labelledby="contained-modal-title-lg" className={className}>
+        <Modal show={modal.show} onHide={modal.onHide} size="lg" aria-labelledby="contained-modal-title-lg" className={className}>
             <Modal.Header closeButton>
                 <Modal.Title id="contained-modal-title-lg">{header}</Modal.Title>
             </Modal.Header>
@@ -215,9 +216,10 @@ export class ImageEditorButton extends React.Component {
         let className = this.props.className;
         if (this.state.shiftKey) className += ' btn-warning'
         return (
-            <Button bsStyle={this.props.bsStyle||'primary'} bsSize={this.props.bsSize || 'small'} className={className} onClick={(e) => this.handleClick(e)}>{this.props.children}
+            <React.Fragment>
+                <Button variant={this.props.bsStyle||'primary'} size={this.props.bsSize === 'large' ? 'lg' : (this.props.bsSize === 'xsmall' ? 'xs' : 'sm')} className={className} onClick={(e) => this.handleClick(e)}>{this.props.children}</Button>
                 <ImageEditor show={this.state.showModal} onHide={closeModal}  />
-            </Button>
+            </React.Fragment>
         )
     }
 }
@@ -405,10 +407,10 @@ class ImageEditor extends React.Component
         return <ImageEditorModal modal={{ show: this.props.show, onHide: this.props.onHide }}
                 header="Image Editor"
                 footer={this.state.working? "Working...." : (<div>
-                    <Button bsStyle="warning" onClick={e=>this.handleFilters(e)}><Icon name="warning"/> Modify source image</Button>
+                    <Button variant="warning" onClick={e=>this.handleFilters(e)}><Icon name="warning"/> Modify source image</Button>
                     <Button onClick={e=>this.handleTrace(e)}><Icon name="eye"/> Preview Trace</Button> 
-                    <Button bsStyle="info" onClick={e=>this.handleDownload(e)} disabled={!this.state.svg}><Icon name="download"/> Download</Button>    
-                    <Button bsStyle="success" onClick={e=>this.handleNew(e)} disabled={!this.state.svg}><Icon name="send"/> Create vector</Button>
+                    <Button variant="info" onClick={e=>this.handleDownload(e)} disabled={!this.state.svg}><Icon name="download"/> Download</Button>    
+                    <Button variant="success" onClick={e=>this.handleNew(e)} disabled={!this.state.svg}><Icon name="send"/> Create vector</Button>
                     
                 </div>)}
                     

@@ -6,13 +6,11 @@
  */
 
 // Styles/Fonts
-import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'font-awesome/css/font-awesome.min.css'
-import 'react-select/dist/react-select.css';
 import '../styles/index.css'
 import '../styles/resizer.css';
-import 'bootstrap-range-input/dist/css/bootstrap-range-input.min.css'
+import '../styles/bs5-compat.css'
 
 import ReactDOM from 'react-dom'
 
@@ -99,7 +97,7 @@ const updateTitle=()=>{
 
 class LaserWeb extends React.Component {
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         updateTitle();
     }
 
@@ -107,7 +105,7 @@ class LaserWeb extends React.Component {
         return nextProps.documents !== this.props.documents;
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         try {
             let canvas = document.createElement('canvas');
             let gl = canvas.getContext('webgl', { alpha: true, depth: true, antialias: true, preserveDrawingBuffer: true });

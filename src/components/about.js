@@ -13,7 +13,9 @@ import { version } from '../reducers/settings'
 import { confirm } from './laserweb'
 import { fetchRelease } from '../lib/releases';
 import { LOCALSTORAGE_KEY, getDebug, setDebug } from '../index'
-import Toggle from 'react-toggle'
+import Toggle from './toggle'
+
+const machineAbouts = require.context('raw-loader?esModule=false!../data/lw.machines/machines', false, /\.md$/);
 
 /**
  * About component.
@@ -32,7 +34,7 @@ class About extends React.Component {
         if (this.props.settings.__selectedProfile && this.props.profiles.hasOwnProperty(this.props.settings.__selectedProfile)){
           let aboutFile=this.props.profiles[this.props.settings.__selectedProfile].machineAbout
           if (aboutFile) {
-            machineAbout=<div dangerouslySetInnerHTML={{__html: marked(require('raw-loader!../data/lw.machines/machines/'+aboutFile))}}></div>
+            machineAbout=<div dangerouslySetInnerHTML={{__html: marked(machineAbouts('./'+aboutFile))}}></div>
           }
         }
 
@@ -76,7 +78,7 @@ class About extends React.Component {
                 <div><i>LaserWeb and CNCWeb is <kbd>free software</kbd>. The team of developers have spent countless hours coding, testing and supporting this application. If you enjoy using this application, consider donating a coffee or a beer towards the developers to show your appreciation, by clicking the <Icon name="paypal"/> icon next to the developers you want to support</i></div>
 
                 <hr/>
-                <div className="well">
+                <div className="card card-body p-2 bg-body-tertiary">
                   <h5>Application reset and debug</h5>
                   <Lifesaver/>
                 </div>
@@ -99,13 +101,13 @@ class Lifesaver extends React.Component
     render()
     {
         let button;
-        if (window.require) button = <Button bsSize="xs" bsStyle="warning" onClick={(e) => { this.props.handleDevTools(e) }}><Icon name="gear" /> Toggle Dev tools</Button>
+        if (window.require) button = <Button size="xs" variant="warning" onClick={(e) => { this.props.handleDevTools(e) }}><Icon name="gear" /> Toggle Dev tools</Button>
 
         return <ButtonToolbar>
           {button}
            <div className="form-group toggle-right"><Toggle defaultChecked={getDebug()} onChange={this.props.handleDebug} /><label>Enable debug logger</label></div>
-          <Button bsSize="xs" bsStyle="warning" onClick={(e) => { this.props.handleRefresh(e) }}><Icon name="refresh" /> Refresh window</Button>
-          <Button bsSize="xs" bsStyle="danger" onClick={(e) => { this.props.handleReset(e) }}><Icon name="bolt" /> Reset to factory defaults</Button>
+          <Button size="xs" variant="warning" onClick={(e) => { this.props.handleRefresh(e) }}><Icon name="refresh" /> Refresh window</Button>
+          <Button size="xs" variant="danger" onClick={(e) => { this.props.handleReset(e) }}><Icon name="bolt" /> Reset to factory defaults</Button>
         </ButtonToolbar>
     }
 }

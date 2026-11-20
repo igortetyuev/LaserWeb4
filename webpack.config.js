@@ -1,73 +1,80 @@
 var webpack = require('webpack');
 var path = require('path');
 
-var src_path = path.resolve('./src');
-var dist_path = path.resolve('./dist');
+var src_path = path.resolve(__dirname, 'src');
+var dist_path = path.resolve(__dirname, 'dist');
 
-var prod = process.env.NODE_ENV === 'production' || process.argv.indexOf('-p') !== -1;
-
-module.exports = {
-    context: src_path,
-    entry: prod
-        ? ['babel-polyfill', './index.js']
-        : ['webpack-dev-server/client?http://0.0.0.0:8080', 'webpack/hot/only-dev-server', 'babel-polyfill', './index.js'],
-    output: {
-        path: dist_path,
-        filename: 'index.js'
-    },
-    module: {
-        loaders: [
-            {
-                test: /\.js$/,
-                exclude: /node_modules/,
-                loader: 'babel-loader',
-                query: {
-                    presets: ['react'],
-                    plugins: ['transform-es2015-destructuring', 'transform-es2015-parameters', 'transform-object-rest-spread', 'transform-es2015-modules-commonjs', 'react-hot-loader/babel']
-                }
-            }, {
-                test: /\.css$/,
-                loader: 'style-loader!css-loader'
-            }, {
-                test: /\.png$/,
-                loader: 'url-loader?limit=100000'
-            }, {
-                test: /\.jpg$/,
-                loader: 'file-loader'
-            }, {
-                test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
-                loader: 'url-loader?limit=10000&mimetype=application/font-woff'
-            }, {
-                test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-                loader: 'url-loader?limit=10000&mimetype=application/octet-stream'
-            }, {
-                test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-                loader: 'file-loader'
-            }, {
-                test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-                loader: 'url-loader?limit=10000&mimetype=image/svg+xml'
-            }, {
-                test: /\.json$/,
-                loader: 'json-loader'
-            }, {
-                test: /\.swf$/,
-                loader: "file-loader?name=[path][name].[ext]"
-            }, {
-                test: require.resolve('snapsvg'),
-                loader: 'imports-loader?this=>window,fix=>module.exports=0'
-            },
-        ]
-    },
-    plugins: [
-        new webpack.ProvidePlugin({$: 'jquery', jQuery: 'jquery'}),
-    ].concat(prod
-        ? [new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') })]
-        : [new webpack.HotModuleReplacementPlugin()]),
-    devServer: {
-        contentBase: dist_path,
-        inline: false,
-        hot: true,
-        host: 'localhost' // originally 0.0.0.0
-    },
-    devtool: 'source-map'
+module.exports = function (env, argv) {
+    var prod = argv.mode === 'production';
+    return {
+        mode: prod ? 'production' : 'development',
+        context: src_path,
+        entry: { index: './index.js' },
+        output: {
+            path: dist_path,
+            filename: '[name].js',
+            publicPath: 'auto'
+        },
+        resolve: {
+            fallback: {
+                buffer: require.resolve('buffer/')
+            }
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.js$/,
+                    exclude: /node_modules/,
+                    loader: 'babel-loader'
+                }, {
+                    test: /\.css$/,
+                    use: ['style-loader', 'css-loader']
+                }, {
+                    test: /\.png$/,
+                    type: 'asset',
+                    parser: { dataUrlCondition: { maxSize: 100000 } }
+                }, {
+                    test: /\.jpg$/,
+                    type: 'asset/resource'
+                }, {
+                    test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
+                    type: 'asset',
+                    parser: { dataUrlCondition: { maxSize: 10000 } }
+                }, {
+                    test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+                    type: 'asset',
+                    parser: { dataUrlCondition: { maxSize: 10000 } }
+                }, {
+                    test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+                    type: 'asset/resource'
+                }, {
+                    test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+                    type: 'asset',
+                    parser: { dataUrlCondition: { maxSize: 10000 } }
+                }, {
+                    test: /\.swf$/,
+                    type: 'asset/resource',
+                    generator: { filename: '[name][ext]' }
+                }, {
+                    test: require.resolve('snapsvg'),
+                    use: [{
+                        loader: 'imports-loader',
+                        options: {
+                            wrapper: 'window',
+                            additionalCode: 'var fix = module.exports = 0;'
+                        }
+                    }]
+                },
+            ]
+        },
+        plugins: [
+            new webpack.ProvidePlugin({ $: 'jquery', jQuery: 'jquery' }),
+        ],
+        devServer: {
+            static: dist_path,
+            hot: false,
+            host: 'localhost'
+        },
+        devtool: 'source-map'
+    };
 };

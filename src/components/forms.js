@@ -2,19 +2,67 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
 
-import Toggle from "react-toggle";
-import 'react-toggle/style.css';
+import Toggle from "./toggle";
 import '../styles/forms.css';
-import Select from 'react-select'
+import ReactSelect from 'react-select'
 
-import { Tooltip, Overlay, OverlayTrigger, Popover, FormControl, InputGroup, ControlLabel, FormGroup, Checkbox, Button, Label } from 'react-bootstrap';
+import { Tooltip, Overlay, OverlayTrigger, Popover, Form, InputGroup, Button } from 'react-bootstrap';
 import Icon from './font-awesome';
+
+// Adapter: react-select v1 call conventions -> react-select 5.
+export function LegacySelect({ options = [], value, onChange, multi, simpleValue, delimiter = ',', clearable, disabled, searchable, optionRenderer, valueRenderer, isLoading, ...rest }) {
+    const toOption = (v) => {
+        if (v === null || v === undefined || typeof v === 'object')
+            return v;
+        return options.find(o => o.value === v) || { value: v, label: String(v) };
+    };
+    let v5value;
+    if (multi) {
+        let vals = value;
+        if (typeof vals === 'string') vals = vals.length ? vals.split(delimiter) : [];
+        v5value = (Array.isArray(vals) ? vals : []).map(toOption);
+    } else {
+        v5value = toOption(value);
+        if (v5value === undefined) v5value = null;
+    }
+    const handleChange = (sel) => {
+        if (!onChange) return;
+        if (multi) {
+            const arr = sel || [];
+            if (simpleValue)
+                onChange(arr.map(o => o.value).join(delimiter));
+            else
+                onChange(arr);
+        } else if (simpleValue) {
+            onChange(sel ? sel.value : null);
+        } else {
+            onChange(sel);
+        }
+    };
+    let formatOptionLabel;
+    if (optionRenderer && valueRenderer && optionRenderer !== valueRenderer)
+        formatOptionLabel = (opt, meta) => meta.context === 'value' ? valueRenderer(opt) : optionRenderer(opt);
+    else if (optionRenderer || valueRenderer)
+        formatOptionLabel = optionRenderer || valueRenderer;
+    return <ReactSelect
+        classNamePrefix="lw-select"
+        options={options}
+        value={v5value}
+        onChange={handleChange}
+        isMulti={multi}
+        isClearable={clearable}
+        isDisabled={disabled}
+        isSearchable={searchable}
+        isLoading={isLoading}
+        formatOptionLabel={formatOptionLabel}
+        {...rest} />;
+}
 
 import convert from 'color-convert'
 
 // <input> for text and number fields
 export class Input extends React.Component {
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.onChange = this.onChange.bind(this);
         this.setInput = this.setInput.bind(this);
     }
@@ -55,9 +103,10 @@ export class Input extends React.Component {
 };
 
 class TooltipFormGroup extends React.Component {
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.handleBlur = this.handleBlur.bind(this);
         this.handleFocus = this.handleFocus.bind(this);
+        this.target = React.createRef();
         this.setState({ hasFocus: false })
     }
 
@@ -69,19 +118,19 @@ class TooltipFormGroup extends React.Component {
     }
 
     render() {
-        return <FormGroup validationState={this.props.validationState}
+        return <Form.Group className={"form-group" + (this.props.validationState === "error" ? " lw-validation-error" : "")}
             onBlur={(e) => this.handleBlur(e)}
             onFocus={(e) => this.handleFocus(e)}
             onMouseEnter={(e) => this.handleFocus(e)}
             onMouseLeave={(e) => this.handleBlur(e)}
 
 
-            ref="target">
+            ref={this.target}>
             {this.props.children}
-            <Overlay container={this.props.container || undefined} show={this.props.validationContent && this.state.hasFocus ? true : false} placement={this.props.validationPlacement} target={() => ReactDOM.findDOMNode(this.refs.target)}>
+            <Overlay container={this.props.container || undefined} show={this.props.validationContent && this.state.hasFocus ? true : false} placement={this.props.validationPlacement} target={this.target}>
                 <Tooltip id="validation_tooltip" >{this.props.validationContent}</Tooltip>
             </Overlay>
-        </FormGroup>
+        </Form.Group>
     }
 }
 
@@ -98,17 +147,16 @@ export class NumberField extends React.Component {
 
 
         let input = <InputGroup>
-            {labelAddon ? <InputGroup.Addon>{description}{info}</InputGroup.Addon> : undefined}
-            <Input Component={FormControl} type="number" onChangeValue={v => dispatch(setAttrs({ [field]: v }, object.id))} value={object[field]} {...rest} />
-            {errors ? <FormControl.Feedback /> : undefined}
-            {units ? <InputGroup.Addon>{units}</InputGroup.Addon> : undefined}
-            
+            {labelAddon ? <InputGroup.Text>{description}{info}</InputGroup.Text> : undefined}
+            <Input Component={Form.Control} type="number" onChangeValue={v => dispatch(setAttrs({ [field]: v }, object.id))} value={object[field]} {...rest} />
+            {units ? <InputGroup.Text>{units}</InputGroup.Text> : undefined}
+
         </InputGroup>;
 
 
         return <TooltipFormGroup validationState={errors ? "error" : undefined}
             validationContent={errors}
-            validationPlacement="right">{!labelAddon ? <ControlLabel>{description}{info}</ControlLabel> : undefined}{input}</TooltipFormGroup>
+            validationPlacement="right">{!labelAddon ? <Form.Label>{description}{info}</Form.Label> : undefined}{input}</TooltipFormGroup>
 
     }
 }
@@ -122,28 +170,28 @@ export function TextField({object, field, description, units = "", setAttrs, dis
     let tooltip = <Tooltip id={"toolip_" + field} >{errors}</Tooltip>;
     let input = <InputGroup style={{ width: "100%" }}>
     
-        {(!isTextArea && labelAddon!==false) ? (<InputGroup.Addon>{description}{info}</InputGroup.Addon>) : undefined}
+        {(!isTextArea && labelAddon!==false) ? (<InputGroup.Text>{description}{info}</InputGroup.Text>) : undefined}
         {(!isTextArea) ? (
-            <FormControl
+            <Form.Control
                 type="text"
                 value={object[field]}
                 onChange={e => dispatch(setAttrs({ [field]: e.target.value }, object.id))}
                 {...rest}
                 />
         ) : (
-            <FormControl componentClass="textarea" id={field}
+            <Form.Control as="textarea" id={field}
                     onChange={e => dispatch(setAttrs({ [field]: e.target.value }, object.id))}
                     value={object[field]}
                     {...rest}
                 />
             )}
-        {(units !== "") ? <InputGroup.Addon>{units}</InputGroup.Addon> : (undefined)}
+        {(units !== "") ? <InputGroup.Text>{units}</InputGroup.Text> : (undefined)}
 
     </InputGroup>;
 
     return <TooltipFormGroup validationState={errors ? "error" : undefined}
         validationContent={errors}
-        validationPlacement="right">{!labelAddon || isTextArea ? <ControlLabel>{description}{info}</ControlLabel> : undefined}{input}</TooltipFormGroup>
+        validationPlacement="right">{!labelAddon || isTextArea ? <Form.Label>{description}{info}</Form.Label> : undefined}{input}</TooltipFormGroup>
 
 }
 
@@ -178,11 +226,11 @@ export class SelectField extends React.Component {
         let errors = hasErrors ? rest.errors[field].join(". ") : null; delete rest.errors;
         let tooltip = <Tooltip id={"toolip_" + field} >{errors}</Tooltip>;
 
-        let label = labelAddon ? <InputGroup.Addon>{description}{units ? " (" + units + ")" : undefined}{info}</InputGroup.Addon> : <ControlLabel>{description}{units ? " (" + units + ")" : undefined}{info}</ControlLabel>
+        let label = labelAddon ? <InputGroup.Text>{description}{units ? " (" + units + ")" : undefined}{info}</InputGroup.Text> : <Form.Label>{description}{units ? " (" + units + ")" : undefined}{info}</Form.Label>
 
         let props = { ...selectProps, options: selectOptions(data), value: object[field] || defaultValue, onChange: (v) => dispatch(setAttrs({ [field]: v.value }, object.id)) }
 
-        let input = <InputGroup>{label}<Select {...props} /></InputGroup>
+        let input = <InputGroup>{label}<LegacySelect {...props} /></InputGroup>
 
         return <TooltipFormGroup validationState={errors ? "error" : undefined}
             validationContent={errors}
@@ -291,7 +339,7 @@ export class CheckBoxListField extends React.Component {
     render() {
         let checks = [];
         let checked = this.state.checked;
-        this.props.data.forEach(o => { checks.push(<Checkbox key={o} value={checked.indexOf(o) !== false} onChange={(e) => { this.handleChange(e, o) } }>{o}</Checkbox>) })
+        this.props.data.forEach(o => { checks.push(<Form.Check type="checkbox" key={o} label={o} value={checked.indexOf(o) !== false} onChange={(e) => { this.handleChange(e, o) } } />) })
         return (
             <div className="checkboxListField">{checks}</div>
         )
@@ -361,8 +409,8 @@ InputRangeField = connect()(InputRangeField);
 
 
 export function Info(content,title='Help',alignment='right', trigger="focus") {
-    let pop=<Popover id={"popover-positioned-"+alignment} title={title}>{content}</Popover>
-    return <OverlayTrigger trigger={trigger} placement="right" overlay={pop}><Button bsSize="xsmall" bsStyle="link" style={{color:"blue", cursor:'pointer'}}><Icon name="question-circle"/></Button></OverlayTrigger>
+    let pop=<Popover id={"popover-positioned-"+alignment}><Popover.Header>{title}</Popover.Header><Popover.Body>{content}</Popover.Body></Popover>
+    return <OverlayTrigger trigger={trigger} placement="right" overlay={pop}><Button size="xs" variant="link" style={{color:"blue", cursor:'pointer'}}><Icon name="question-circle"/></Button></OverlayTrigger>
 }
 
 export class ColorPicker extends React.Component{
@@ -443,7 +491,7 @@ export class ModButton extends React.Component {
             if (child.props['data-eventClassName']) className += ' '+child.props['data-eventClassName']
         
         return (
-            <Button disabled={this.props.disabled} bsStyle={this.props.bsStyle} bsSize={this.props.bsSize || 'small'} className={className} onClick={(e) => this.handleClick(e)}>{child}</Button>
+            <Button disabled={this.props.disabled} variant={this.props.bsStyle} size={this.props.bsSize === 'xsmall' ? 'xs' : 'sm'} className={className} onClick={(e) => this.handleClick(e)}>{child}</Button>
         )
     }
 }
@@ -456,24 +504,22 @@ export class SearchButton extends React.Component {
         this.state={search: this.props.search}
     }
 
-    componentWillReceiveProps(nextProps)
+    UNSAFE_componentWillReceiveProps(nextProps)
     {
         this.setState({search: nextProps.search})
     }
 
     render(){
 
-        let pop=<Popover id={"SearchButton_popover"} title={this.props.title || "Search"}><FormGroup>
+        let pop=<Popover id={"SearchButton_popover"}><Popover.Header>{this.props.title || "Search"}</Popover.Header><Popover.Body><Form.Group className="form-group">
             <InputGroup>
-            <FormControl type="text" value={this.state.search||""} onChange={e=>{this.setState({search:e.target.value})}} />
-            <InputGroup.Button>
-                <Button bsStyle="primary" onClick={e=>{this.props.onSearch(this.state.search)}}><Icon name="search"/></Button>
-                <Button bsStyle="danger" onClick={e=>{this.props.onSearch(null)}}><Icon name="remove"/></Button>
-            </InputGroup.Button>
+            <Form.Control type="text" value={this.state.search||""} onChange={e=>{this.setState({search:e.target.value})}} />
+                <Button variant="primary" onClick={e=>{this.props.onSearch(this.state.search)}}><Icon name="search"/></Button>
+                <Button variant="danger" onClick={e=>{this.props.onSearch(null)}}><Icon name="remove"/></Button>
             </InputGroup>
-        </FormGroup></Popover>
+        </Form.Group></Popover.Body></Popover>
 
-        return <OverlayTrigger trigger="click" placement={this.props.placement || "top"} overlay={pop}><Button bsStyle={this.props.bsStyle} bsSize={this.props.bsSize}>{this.props.children}</Button></OverlayTrigger>
+        return <OverlayTrigger trigger="click" placement={this.props.placement || "top"} overlay={pop}><Button variant={this.props.bsStyle} size={this.props.bsSize === 'xsmall' ? 'xs' : this.props.bsSize}>{this.props.children}</Button></OverlayTrigger>
         
     }
 }

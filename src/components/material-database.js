@@ -11,7 +11,7 @@ import {
 
 import { OPERATION_FIELDS, OPERATION_TYPES } from './operation'
 
-import { Modal, Button, ButtonToolbar, ButtonGroup, FormControl, ControlLabel, FormGroup, PanelGroup, Panel, Collapse, InputGroup } from 'react-bootstrap'
+import { Modal, Button, ButtonToolbar, Form, Collapse, InputGroup } from 'react-bootstrap'
 import { FileField } from './forms'
 
 import Icon from './font-awesome';
@@ -19,7 +19,7 @@ import stringify from 'json-stringify-pretty-compact';
 
 import { materialTreeToTabular, materialTabularToTree, arr2csv, csv2arr } from '../lib/material-database';
 
-import Select from 'react-select';
+import { LegacySelect as Select } from './forms';
 
 import { FileStorage, LocalStorage } from '../lib/storages';
 
@@ -60,7 +60,7 @@ export function ValidateMaterial(bool = true, rules = MATERIALDATABASE_VALIDATIO
 function MaterialModal({ modal, className, header, footer, children, ...rest }) {
 
     return (
-        <Modal show={modal.show} onHide={modal.onHide} bsSize="large" aria-labelledby="contained-modal-title-lg" className={className}>
+        <Modal show={modal.show} onHide={modal.onHide} size="lg" aria-labelledby="contained-modal-title-lg" className={className}>
             <Modal.Header closeButton>
                 <Modal.Title id="contained-modal-title-lg">{header}</Modal.Title>
             </Modal.Header>
@@ -157,8 +157,8 @@ class MaterialDatabaseEditor extends React.Component {
             <MaterialModal modal={{ show: this.props.show, onHide: this.props.onHide }} className='full-width'
                 header="Material Database"
                 footer={<ButtonToolbar>
-                    <Button bsStyle="info" onClick={(e) => this.handleExport(e, 'json')}><Icon name="download" /> .json</Button>
-                    <FileField onChange={(e) => this.props.handleUpload(e.target.files[0], uploadMaterialDatabase)}><Button bsStyle="danger"><Icon name="upload" /></Button></FileField>
+                    <Button variant="info" onClick={(e) => this.handleExport(e, 'json')}><Icon name="download" /> .json</Button>
+                    <FileField onChange={(e) => this.props.handleUpload(e.target.files[0], uploadMaterialDatabase)}><Button variant="danger"><Icon name="upload" /></Button></FileField>
                 </ButtonToolbar>}
             >
                 <MaterialMachineProfile profiles={this.props.profiles} selected={this.state.selected} onChange={(value) => { this.handleProfileSelect(value) }} />
@@ -199,8 +199,8 @@ class GroupsPane extends React.Component {
                 <div className="full-height innerPane"  >
                     <div className="paneToolbar">
                         <h5>Groupings</h5>
-                        <Button onClick={e => this.props.onGroupAdd()} bsSize="xs" bsStyle="success"><Icon name="plus" /> Add</Button>
-                        <Button onClick={e => this.props.onGroupDelete(this.props.itemId)} bsSize="xs" bsStyle="danger" disabled={this.props.itemId ? false : true}><Icon name="trash" /> Delete</Button>
+                        <Button onClick={e => this.props.onGroupAdd()} size="xs" variant="success"><Icon name="plus" /> Add</Button>
+                        <Button onClick={e => this.props.onGroupDelete(this.props.itemId)} size="xs" variant="danger" disabled={this.props.itemId ? false : true}><Icon name="trash" /> Delete</Button>
                     </div>
                     <div className="listing">
                         {this.props.items.map((item, i) => {
@@ -239,16 +239,16 @@ class PresetActions extends React.Component {
     }
     render() {
 
-        return <FormGroup>
+        return <Form.Group className="form-group">
             <InputGroup>
-                <InputGroup.Button><Button disabled={this.props.disabled} onClick={(e) => { this.props.onCloneTo(this.props.groupId, this.state.selected) }} bsStyle="success" title="Clones current template to other Group" ><Icon name="clone" /> Clone to</Button></InputGroup.Button>
-                <FormControl componentClass="select" placeholder="type" onChange={(e) => this.setState({ selected: e.target.value })} disabled={this.props.disabled}>
+                <Button disabled={this.props.disabled} onClick={(e) => { this.props.onCloneTo(this.props.groupId, this.state.selected) }} variant="success" title="Clones current template to other Group" ><Icon name="clone" /> Clone to</Button>
+                <Form.Control as="select" placeholder="type" onChange={(e) => this.setState({ selected: e.target.value })} disabled={this.props.disabled}>
                     <option></option>
                     {this.props.groups.map((group, i) => { if (this.props.groupId !== group.id) return <option key={i} value={group.id}>{group.name}</option> })}
-                </FormControl>
+                </Form.Control>
 
             </InputGroup>
-        </FormGroup>
+        </Form.Group>
     }
 }
 
@@ -263,22 +263,22 @@ class PresetsPane extends React.Component {
                 heading = (<div className="operationHeading isEditable">
                     <fieldset>
                         <legend>Grouping</legend>
-                        <FormGroup>
-                            <ControlLabel>Name</ControlLabel>
-                            <FormControl
+                        <Form.Group className="form-group">
+                            <Form.Label>Name</Form.Label>
+                            <Form.Control
                                 type="text"
                                 value={item.name}
                                 placeholder="Name of the Operation Group"
                                 onChange={(e) => { this.props.onGroupChange(this.props.groupId, { name: e.target.value }) }}
                             />
-                            <FormControl.Feedback />
-                        </FormGroup>
+                            <Form.Control.Feedback />
+                        </Form.Group>
 
-                        <FormGroup>
-                            <ControlLabel>Notes</ControlLabel>
-                            <FormControl componentClass="textarea" placeholder="notes" value={item.notes} onChange={(e) => { this.props.onGroupChange(this.props.groupId, { notes: e.target.value }) }} />
-                            <FormControl.Feedback />
-                        </FormGroup>
+                        <Form.Group className="form-group">
+                            <Form.Label>Notes</Form.Label>
+                            <Form.Control as="textarea" placeholder="notes" value={item.notes} onChange={(e) => { this.props.onGroupChange(this.props.groupId, { notes: e.target.value }) }} />
+                            <Form.Control.Feedback />
+                        </Form.Group>
                     </fieldset>
                     <fieldset>
                         <legend>Default Template</legend>
@@ -310,14 +310,14 @@ class PresetsPane extends React.Component {
             leftToolbar = (<div className="paneToolbar">
                 <h5>Group</h5>
                 <Button onClick={(e) => { this.props.onGroupEdit(this.props.groupId) }}
-                    bsSize="xsmall" bsStyle={item.isEditable ? "primary" : "warning"} >
+                    size="xs" variant={item.isEditable ? "primary" : "warning"} >
                     {item.isEditable ? <span><Icon name="floppy-o" /> Save</span> : <span><Icon name="pencil" /> Edit</span>}
                 </Button>
             </div>)
 
             rightToolbar = (<div className="paneToolbar">
                 <h5>Presets</h5>
-                <Button bsSize="xsmall" bsStyle="success" onClick={(e) => { this.props.onPresetAdd(this.props.groupId) }}><Icon name="plus" /> Add</Button>
+                <Button size="xs" variant="success" onClick={(e) => { this.props.onPresetAdd(this.props.groupId) }}><Icon name="plus" /> Add</Button>
             </div>)
 
             presets = item.presets;
@@ -338,17 +338,17 @@ class PresetsPane extends React.Component {
 
             <div className="full-height right innerPane">
                 {rightToolbar}
-                <PanelGroup defaultActiveKey="0" style={{ overflow: 'auto', flexGrow: 10 }}>
+                <div style={{ overflow: 'auto', flexGrow: 10 }}>
                     {__presets.map((operation, i) => {
                         return <Details className={operation.isEditable ? "editable" : ""} key={i} open={operation.isEditable}
                             handler={<h4>{`${operation.name} (${operation.type})`} <div><small>{operation.notes}</small></div></h4>}
                             header={<div>
                                 <Button onClick={(e) => { this.props.onPresetEdit(operation.id) }}
-                                    bsSize="xsmall" bsStyle={operation.isEditable ? "primary" : "warning"} >
+                                    size="xs" variant={operation.isEditable ? "primary" : "warning"} >
                                     {operation.isEditable ? <span><Icon name="floppy-o" /> Save</span> : <span><Icon name="pencil" /> Edit</span>}
                                 </Button>
 
-                                <Button onClick={(e) => { this.props.onPresetDelete(operation.id) }} bsSize="xsmall" bsStyle="danger"><Icon name="trash" /> Delete</Button>
+                                <Button onClick={(e) => { this.props.onPresetDelete(operation.id) }} size="xs" variant="danger"><Icon name="trash" /> Delete</Button>
                             </div>} >
                             <PresetOperationSettings operation={operation} isEditable={operation.isEditable}
                                 onCellChange={(id, attrs) => { this.props.onPresetChange(id, attrs) }}
@@ -360,7 +360,7 @@ class PresetsPane extends React.Component {
                         </Details>
                     })}
                     { (!__presets.length && this.props.selectedProfile.length) ? 'Presets not shown due machine profile filters':undefined }
-                </PanelGroup>
+                </div>
             </div>
         </div>
     }
@@ -387,34 +387,34 @@ class PresetOperationSettings extends React.Component {
         if (this.props.isEditable) {
             result = (<div>
 
-                <FormGroup>
-                    <ControlLabel>Name</ControlLabel>
-                    <FormControl
+                <Form.Group className="form-group">
+                    <Form.Label>Name</Form.Label>
+                    <Form.Control
                         type="text"
                         value={op.name}
                         placeholder="Name"
                         onChange={(e) => this.props.onCellChange(op.id, { name: e.target.value })}
                     />
-                    <FormControl.Feedback />
-                </FormGroup>
+                    <Form.Control.Feedback />
+                </Form.Group>
 
-                <FormGroup>
-                    <ControlLabel>Notes</ControlLabel>
-                    <FormControl componentClass="textarea" placeholder="Notes" value={op.notes ? op.notes : ""} onChange={(e) => this.props.onCellChange(op.id, { notes: e.target.value })} />
-                    <FormControl.Feedback />
-                </FormGroup>
+                <Form.Group className="form-group">
+                    <Form.Label>Notes</Form.Label>
+                    <Form.Control as="textarea" placeholder="Notes" value={op.notes ? op.notes : ""} onChange={(e) => this.props.onCellChange(op.id, { notes: e.target.value })} />
+                    <Form.Control.Feedback />
+                </Form.Group>
 
-                <FormGroup>
-                    <ControlLabel>Machine profile</ControlLabel>
+                <Form.Group className="form-group">
+                    <Form.Label>Machine profile</Form.Label>
                     <MaterialMachineProfile label="Machine profile" onChange={(v) => { this.props.onCellChange(op.id, { machine_profile: v }) }} selected={op.machine_profile} />
-                </FormGroup>
-                <FormGroup>
-                    <ControlLabel>Type</ControlLabel>
-                    <FormControl componentClass="select" placeholder="type" value={op.type} onChange={(e) => this.props.onCellChange(op.id, { type: e.target.value })}>
+                </Form.Group>
+                <Form.Group className="form-group">
+                    <Form.Label>Type</Form.Label>
+                    <Form.Control as="select" placeholder="type" value={op.type} onChange={(e) => this.props.onCellChange(op.id, { type: e.target.value })}>
                         {Object.keys(OPERATION_TYPES).map((option, i) => { return <option key={i} value={option}>{option}</option> })}
-                    </FormControl>
-                    <FormControl.Feedback />
-                </FormGroup>
+                    </Form.Control>
+                    <Form.Control.Feedback />
+                </Form.Group>
 
             </div>)
 
@@ -493,7 +493,7 @@ export class Details extends React.Component {
         this.state = { open: this.props.open || false }
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         if (nextProps.open !== undefined)
             this.setState({ ...this.state, open: nextProps.open || this.state.open })
     }
@@ -568,7 +568,7 @@ class MaterialDatabasePicker extends React.Component {
                                     let disabled= (this.props.types && !this.props.types.includes(op.type)) || !this.props.types;
                                     return <Details key={j}
                                         handler={<div className="handler"><strong>{op.name}</strong><small>{op.type}</small></div>}
-                                        header={<Button disabled={disabled} bsStyle="success" bsSize="xsmall" title={disabled? 'Operation Documents not compatible with this type':undefined } onClick={(e) => { this.handleApplyPreset(op.id) }}><Icon name="share" /></Button>}
+                                        header={<Button disabled={disabled} variant="success" size="xs" title={disabled? 'Operation Documents not compatible with this type':undefined } onClick={(e) => { this.handleApplyPreset(op.id) }}><Icon name="share" /></Button>}
                                     >
                                         <table className="table table-sm">
                                             <tbody>
@@ -665,7 +665,10 @@ export class MaterialDatabaseButton extends React.Component {
         let closeModal = () => this.setState({ showModal: false });
 
         return (
-            <Button bsStyle="primary" block onClick={() => this.setState({ showModal: true })}>{this.props.children}<MaterialDatabaseEditor show={this.state.showModal} onHide={closeModal} /></Button>
+            <React.Fragment>
+                <Button variant="primary" block onClick={() => this.setState({ showModal: true })}>{this.props.children}</Button>
+                <MaterialDatabaseEditor show={this.state.showModal} onHide={closeModal} />
+            </React.Fragment>
         )
     }
 }
@@ -763,9 +766,10 @@ export class MaterialPickerButton extends React.Component {
         let className = this.props.className;
         //if (this.state.shiftKey) className += ' btn-warning'
         return (
-            <Button title="Load from Material Database" bsStyle="danger" className={className} onClick={(e) => this.handleClick(e)}>{this.props.children}
+            <React.Fragment>
+                <Button title="Load from Material Database" variant="danger" className={className} onClick={(e) => this.handleClick(e)}>{this.props.children}</Button>
                 <MaterialDatabasePicker types={this.props.types} show={this.state.showModal} onHide={closeModal} onApplyPreset={(operationId) => { this.handleApplyPreset(operationId) }} />
-            </Button>
+            </React.Fragment>
         )
     }
 }
@@ -824,9 +828,10 @@ export class MaterialSaveButton extends React.Component {
         let className = this.props.className;
         //if (this.state.shiftKey) className += ' btn-warning'
         return (
-            <Button title="Export to Material Database" bsStyle="primary" className={className} onClick={(e) => this.handleClick(e)}>{this.props.children}
+            <React.Fragment>
+                <Button title="Export to Material Database" variant="primary" className={className} onClick={(e) => this.handleClick(e)}>{this.props.children}</Button>
                 <MaterialDatabasePicker types={this.props.types} show={this.state.showModal} onHide={closeModal} onApplyPreset={(operationId) => { this.handleApplyPreset(operationId) }} />
-            </Button>
+            </React.Fragment>
         )
     }
 }

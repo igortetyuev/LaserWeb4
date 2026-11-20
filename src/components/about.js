@@ -117,18 +117,7 @@ Lifesaver = connect((store)=>({}),(dispatch) =>{
         },
         handleDevTools: () => {
             if (window.require) { // Are we in Electron?
-                const electron = window.require('electron');
-                const app = electron.remote;
-                var focusedWindow = app.BrowserWindow.getFocusedWindow()
-                // focusedWindow.openDevTools();
-                if (app.BrowserWindow.getFocusedWindow) {
-                    // var focusedWindow = app.BrowserWindow.getFocusedWindow()
-                    if (focusedWindow.isDevToolsOpened()) {
-                        focusedWindow.closeDevTools();
-                    } else {
-                        focusedWindow.openDevTools();
-                    }
-                }
+                window.require('electron').ipcRenderer.send('toggle-devtools');
             } else {
                 console.warn("Can't do that, pal")
             }

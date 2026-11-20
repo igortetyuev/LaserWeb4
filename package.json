@@ -2,17 +2,20 @@
   "name": "laserweb",
   "version": "4.0.999",
   "description": "LaserWeb",
-  "main": "./src/index.js",
+  "main": "electron/main.js",
   "scripts": {
+    "electron": "env -u ELECTRON_RUN_AS_NODE electron .",
     "start-server": "node node_modules/lw.comm-server/server.js",
     "start-app": "webpack-dev-server --progress --colors --open",
     "start-prod": "webpack-dev-server -p --progress --colors --open",
     "start": "npm-run-all -p -r start-app start-server",
     "bundle-dev": "webpack --progress --colors",
-    "bundle-prod": "webpack -p --progress --colors",
+    "bundle-prod": "NODE_ENV=production webpack --progress --colors",
     "build-docs": "jsdoc -c ./jsdoc.json",
     "installdev": "git submodule init && git submodule update --remote && npm install && npm update lw.comm-server",
-    "golive": "git checkout gh-pages && git pull && git merge dev-es6 && npm run bundle-dev && git add dist && git commit -m regen && git push && git checkout dev-es6"
+    "golive": "git checkout gh-pages && git pull && git merge dev-es6 && npm run bundle-dev && git add dist && git commit -m regen && git push && git checkout dev-es6",
+    "start-electron": "npm run bundle-prod && env -u ELECTRON_RUN_AS_NODE electron .",
+    "dist": "npm run bundle-prod && electron-builder"
   },
   "repository": {
     "type": "git",
@@ -27,8 +30,8 @@
   "author": "Peter van der Walt <peter.plaaswerf@gmail.com>",
   "contributors": [
     "Peter van der Walt <peter.plaaswerf@gmail.com>",
-    "Sébastien Mischler <sebastien@onlfait.ch>",
-    "João Matos <joao@tritao.eu>",
+    "S\u00e9bastien Mischler <sebastien@onlfait.ch>",
+    "Jo\u00e3o Matos <joao@tritao.eu>",
     "Todd Fleming <jscut.org>",
     "Jorge Robles <jorge.diego.robles@gmail.com>",
     "Claudio Prezzi <cprezzi@comsulting.ch>"
@@ -57,6 +60,8 @@
     "clipper-lib": "^6.2.1",
     "color-convert": "^1.9.0",
     "css-loader": "^0.28.5",
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0",
     "file-loader": "^0.11.2",
     "flat": "^2.0.1",
     "floyd-steinberg": "^1.0.6",
@@ -70,7 +75,6 @@
     "keyboardjs": "^2.5.1",
     "lw.canvas-filters": "git+https://github.com/LaserWeb/lw.canvas-filters.git",
     "lw.canvas-grid": "git+https://github.com/LaserWeb/lw.canvas-grid.git",
-    "lw.comm-server": "git+https://github.com/LaserWeb/lw.comm-server.git",
     "lw.raster-to-gcode": "git+https://github.com/LaserWeb/lw.raster-to-gcode.git",
     "lw.svg-curves": "^0.1.0",
     "lw.svg-path": "^0.1.0",
@@ -116,8 +120,32 @@
     "dxf-parser": "^0.4.8",
     "hoek": "^5.0.3",
     "immutability-helper": "^2.9.1",
+    "lw.comm-server": "file:vendor/lw.comm-server",
     "object.omit": "^3.0.0",
     "unicode": "^9.0.0",
     "vectorize-text": "^3.2.1"
+  },
+  "allowScripts": {
+    "@serialport/bindings-cpp@13.0.0": true,
+    "node-hid@3.4.0": true,
+    "fsevents@2.3.2": true,
+    "fsevents@1.2.13": true
+  },
+  "build": {
+    "appId": "xyz.laserweb",
+    "productName": "LaserWeb",
+    "asar": true,
+    "files": [
+      "dist/**",
+      "electron/**",
+      "vendor/**",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.graphics-design"
+    },
+    "directories": {
+      "output": "release"
+    }
   }
 }

@@ -3,4 +3,4 @@ dist
 *.log
 .vscode
 .zip
-machine-profiles.json
+machine-profiles.jsonrelease/

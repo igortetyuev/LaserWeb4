@@ -4,11 +4,13 @@ var path = require('path');
 var src_path = path.resolve('./src');
 var dist_path = path.resolve('./dist');
 
+var prod = process.env.NODE_ENV === 'production' || process.argv.indexOf('-p') !== -1;
+
 module.exports = {
     context: src_path,
-    entry: [
-        'webpack-dev-server/client?http://0.0.0.0:8080', 'webpack/hot/only-dev-server', 'babel-polyfill', './index.js'
-    ],
+    entry: prod
+        ? ['babel-polyfill', './index.js']
+        : ['webpack-dev-server/client?http://0.0.0.0:8080', 'webpack/hot/only-dev-server', 'babel-polyfill', './index.js'],
     output: {
         path: dist_path,
         filename: 'index.js'
@@ -58,8 +60,9 @@ module.exports = {
     },
     plugins: [
         new webpack.ProvidePlugin({$: 'jquery', jQuery: 'jquery'}),
-        new webpack.HotModuleReplacementPlugin(),
-    ],
+    ].concat(prod
+        ? [new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') })]
+        : [new webpack.HotModuleReplacementPlugin()]),
     devServer: {
         contentBase: dist_path,
         inline: false,
